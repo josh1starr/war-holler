@@ -71,7 +71,7 @@ namespace WarHoller.UI
             var img = go.AddComponent<Image>();
             img.color = bg ?? new Color(0.25f, 0.18f, 0.1f, 0.92f);
 
-            var btn = go.AddComponent<Button>();
+            var btn = go.AddComponent<UnityEngine.UI.Button>();
             btn.targetGraphic = img;
             btn.onClick.AddListener(onClick);
 
@@ -124,11 +124,11 @@ namespace WarHoller.UI
             var handleRt = handle.GetComponent<RectTransform>();
             handleRt.sizeDelta = new Vector2(20f, 0f);
 
-            var slider = go.AddComponent<Slider>();
+            var slider = go.AddComponent<UnityEngine.UI.Slider>();
             slider.fillRect = fillImgRt;
             slider.handleRect = handleRt;
             slider.targetGraphic = handleImg;
-            slider.direction = Slider.Direction.LeftToRight;
+            slider.direction = UnityEngine.UI.Slider.Direction.LeftToRight;
             slider.minValue = 0f;
             slider.maxValue = 1f;
             slider.value = value;
