@@ -1,4 +1,5 @@
 using UnityEngine;
+using WarHoller.Art;
 
 namespace WarHoller.Maps
 {
@@ -97,11 +98,6 @@ namespace WarHoller.Maps
             return go;
         }
 
-        static Material Mat(Color c)
-        {
-            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            var m = new Material(shader) { color = c };
-            return m;
-        }
+        static Material Mat(Color c) => MaterialUtil.CreateColor(c);
     }
 }

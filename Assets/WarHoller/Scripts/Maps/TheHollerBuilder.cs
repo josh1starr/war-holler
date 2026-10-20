@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using WarHoller.Art;
 
 namespace WarHoller.Maps
 {
@@ -192,6 +193,7 @@ namespace WarHoller.Maps
                 light.shadows = LightShadows.Soft;
             }
 
+            RenderSettings.skybox = null;
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.55f, 0.65f, 0.75f);
             RenderSettings.ambientEquatorColor = new Color(0.45f, 0.5f, 0.35f);
@@ -235,12 +237,7 @@ namespace WarHoller.Maps
             return go;
         }
 
-        static Material Mat(Color c)
-        {
-            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            var m = new Material(shader) { color = c };
-            return m;
-        }
+        static Material Mat(Color c) => MaterialUtil.CreateColor(c);
 
         // EXTENSION: WowMartBuilder / MethLabBuilder can mirror this pattern for LobbyRotation maps.
     }

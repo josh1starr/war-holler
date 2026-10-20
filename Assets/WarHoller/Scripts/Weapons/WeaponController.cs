@@ -1,4 +1,5 @@
 using UnityEngine;
+using WarHoller.Art;
 using WarHoller.Core;
 using WarHoller.Gameplay;
 
@@ -49,8 +50,7 @@ namespace WarHoller.Weapons
                     : new Vector3(0.08f, 0.1f, 0.7f);
 
             var r = _viewModel.GetComponent<Renderer>();
-            r.material = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-            r.material.color = Stats.Tint;
+            r.material = MaterialUtil.CreateColor(Stats.Tint);
 
             var muzzleGo = new GameObject("Muzzle");
             muzzleGo.transform.SetParent(_viewModel.transform, false);

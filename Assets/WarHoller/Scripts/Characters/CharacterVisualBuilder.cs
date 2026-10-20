@@ -1,4 +1,5 @@
 using UnityEngine;
+using WarHoller.Art;
 
 namespace WarHoller.Characters
 {
@@ -95,12 +96,6 @@ namespace WarHoller.Characters
             return go;
         }
 
-        static Material MakeMat(Color c)
-        {
-            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            var m = new Material(shader);
-            m.color = c;
-            return m;
-        }
+        static Material MakeMat(Color c) => MaterialUtil.CreateColor(c);
     }
 }
