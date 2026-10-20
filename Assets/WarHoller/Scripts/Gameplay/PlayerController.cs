@@ -51,6 +51,9 @@ namespace WarHoller.Gameplay
                 camGo.AddComponent<AudioListener>();
                 PlayerCamera.nearClipPlane = 0.05f;
                 PlayerCamera.fieldOfView = 75f;
+                // Solid country-sky clear so a missing/broken skybox never paints magenta.
+                PlayerCamera.clearFlags = CameraClearFlags.SolidColor;
+                PlayerCamera.backgroundColor = new Color(0.45f, 0.68f, 0.92f);
             }
 
             if (Weapon == null)

@@ -56,11 +56,9 @@ The known CS0119 (`UiFactory` methods named `Button`/`Slider` shadowing `UnityEn
 
 ### URP note
 
-`Packages/manifest.json` includes `com.unity.render-pipelines.universal`. On first open, if materials look pink:
+`Packages/manifest.json` includes `com.unity.render-pipelines.universal`. This repo ships ready-to-load URP assets under `Assets/Settings/` (`PC_RPAsset` / `Mobile_RPAsset` + renderers + Global Settings), already assigned in **Project Settings → Graphics** and **Quality**. Runtime materials go through `WarHoller.Art.MaterialUtil.CreateColor` (URP Lit → Simple Lit → Unlit → Standard fallback).
 
-1. Window → Rendering → Render Pipeline Converter (or create a URP Asset via Create → Rendering → URP Asset).
-2. Assign the URP asset under Project Settings → Graphics / Quality.
-3. Shaders already prefer `Universal Render Pipeline/Lit` and fall back to `Standard`.
+**If still pink:** Project Settings → Graphics → Scriptable Render Pipeline Settings should be `PC_RPAsset` (and each Quality level’s Custom Render Pipeline should be `PC_RPAsset` or `Mobile_RPAsset`). Then let Unity finish importing URP shaders and re-enter Play Mode.
 
 ## What’s in the slice
 
@@ -85,9 +83,11 @@ Commented stubs / enums — not playable yet:
 ## Folder layout
 
 ```
+Assets/Settings/   URP PC/Mobile assets, renderer data, Global Settings
 Assets/WarHoller/
   Art/ Audio/ Characters/ Gameplay/ Maps/ UI/
   Scripts/
+    Art/         MaterialUtil (runtime URP material helper)
     Bootstrap/   GameBootstrap
     Core/        ModeIds, MapIds, SettingsStore, LobbyRotation, PlayerLoadout
     Characters/  CharacterRoster, CharacterVisualBuilder
