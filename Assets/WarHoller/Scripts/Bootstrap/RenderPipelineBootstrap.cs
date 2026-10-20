@@ -2,95 +2,60 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using WarHoller.Art;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace WarHoller.Bootstrap
 {
     /// <summary>
-    /// Assigns a URP pipeline asset at the earliest possible moment so runtime materials
-    /// resolve against a live SRP instead of pink/magenta Missing shaders.
-    /// Prefers Resources copies under WarHoller/Resources/URP; Editor can also load Assets/Settings.
+    /// Forces Built-in Render Pipeline: clears any Scriptable Render Pipeline assignment
+    /// so MaterialUtil Standard / Unlit/Color materials paint correctly.
     /// </summary>
     public static class RenderPipelineBootstrap
     {
-        const string ResourcesPcPath = "URP/PC_RPAsset";
-        const string ResourcesMobilePath = "URP/Mobile_RPAsset";
-        const string EditorPcPath = "Assets/Settings/PC_RPAsset.asset";
-        const string EditorMobilePath = "Assets/Settings/Mobile_RPAsset.asset";
-
         static bool _ran;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void BeforeSceneLoad() => EnsurePipeline(forceLog: true);
+        static void BeforeSceneLoad() => EnsureBuiltIn(forceLog: true);
 
-        /// <summary>Idempotent assign + diagnostic log. Safe to call from GameBootstrap.Awake.</summary>
-        public static void EnsurePipeline(bool forceLog = false)
+        /// <summary>Idempotent clear of SRP + diagnostic log. Safe to call from GameBootstrap.Awake.</summary>
+        public static void EnsureBuiltIn(bool forceLog = false)
         {
-            var alreadyHadPipeline = GraphicsSettings.currentRenderPipeline != null
-                                     || GraphicsSettings.defaultRenderPipeline != null;
+            var hadSrp = GraphicsSettings.defaultRenderPipeline != null
+                         || QualitySettings.renderPipeline != null
+                         || GraphicsSettings.currentRenderPipeline != null;
 
-            if (_ran && alreadyHadPipeline && !forceLog)
+            if (_ran && !hadSrp && !forceLog)
                 return;
 
-            var asset = LoadPipelineAsset();
-            if (asset != null)
-            {
-                GraphicsSettings.defaultRenderPipeline = asset;
-                QualitySettings.renderPipeline = asset;
-                MaterialUtil.InvalidateCache();
-                _ran = true;
-            }
-            else if (!_ran)
-            {
-                Debug.LogWarning(
-                    "[WarHoller] RenderPipelineBootstrap: no URP asset found in Resources or Assets/Settings. " +
-                    "If the screen is pink, set Project Settings → Graphics → Scriptable Render Pipeline to None (Built-in) " +
-                    "so MaterialUtil Standard / Unlit/Color fallbacks can paint correctly.");
-                MaterialUtil.InvalidateCache();
-                _ran = true;
-            }
+            // Built-in: no custom SRP on Graphics or Quality.
+            GraphicsSettings.defaultRenderPipeline = null;
+            QualitySettings.renderPipeline = null;
+            MaterialUtil.InvalidateCache();
+            _ran = true;
 
-            LogDiagnostics(asset);
+            LogDiagnostics(hadSrp);
         }
 
-        static RenderPipelineAsset LoadPipelineAsset()
-        {
-            // Prefer Resources so Play Mode / builds work even if GraphicsSettings YAML GUID broke.
-            var fromResources = Resources.Load<RenderPipelineAsset>(ResourcesPcPath)
-                                ?? Resources.Load<RenderPipelineAsset>(ResourcesMobilePath);
-            if (fromResources != null)
-                return fromResources;
+        // Keep old name as alias so any stray call sites still compile/force Built-in.
+        public static void EnsurePipeline(bool forceLog = false) => EnsureBuiltIn(forceLog);
 
-#if UNITY_EDITOR
-            var fromEditor = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(EditorPcPath)
-                             ?? AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(EditorMobilePath);
-            if (fromEditor != null)
-                return fromEditor;
-#endif
-            return GraphicsSettings.defaultRenderPipeline ?? QualitySettings.renderPipeline;
-        }
-
-        static void LogDiagnostics(RenderPipelineAsset assigned)
+        static void LogDiagnostics(bool clearedSrp)
         {
             var current = GraphicsSettings.currentRenderPipeline;
             var def = GraphicsSettings.defaultRenderPipeline;
             var quality = QualitySettings.renderPipeline;
-            var lit = Shader.Find("Universal Render Pipeline/Lit");
             var standard = Shader.Find("Standard");
             var unlit = Shader.Find("Unlit/Color");
             var sprites = Shader.Find("Sprites/Default");
+            var legacy = Shader.Find("Legacy Shaders/Diffuse");
             var resolved = MaterialUtil.ResolveShader();
 
             Debug.Log(
-                "[WarHoller] Pipeline bootstrap — " +
-                $"assigned={(assigned != null ? assigned.name : "null")}, " +
+                "[WarHoller] Built-in pipeline bootstrap — " +
+                $"clearedSrp={clearedSrp}, " +
                 $"currentRenderPipeline={(current != null ? current.name : "NULL")}, " +
                 $"defaultRenderPipeline={(def != null ? def.name : "NULL")}, " +
                 $"qualityRenderPipeline={(quality != null ? quality.name : "NULL")}, " +
-                $"Shader.Find Lit={(lit != null)}, Standard={(standard != null)}, " +
-                $"Unlit/Color={(unlit != null)}, Sprites/Default={(sprites != null)}, " +
+                $"Shader.Find Standard={(standard != null)}, Unlit/Color={(unlit != null)}, " +
+                $"Sprites/Default={(sprites != null)}, Legacy Diffuse={(legacy != null)}, " +
                 $"MaterialUtil resolved={(resolved != null ? resolved.name : "NULL")}");
         }
     }

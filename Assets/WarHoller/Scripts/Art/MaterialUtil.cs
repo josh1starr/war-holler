@@ -1,41 +1,26 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace WarHoller.Art
 {
     /// <summary>
-    /// Runtime material factory with a pipeline-aware shader fallback chain.
-    /// Sets both URP (_BaseColor) and Built-in (_Color) so materials stay tinted on either pipeline.
+    /// Runtime material factory for Built-in Render Pipeline only.
+    /// Tries Standard → Unlit/Color → Sprites/Default → Legacy Shaders/Diffuse; sets _Color.
     /// </summary>
     public static class MaterialUtil
     {
-        static readonly string[] UrpFirst =
-        {
-            "Universal Render Pipeline/Lit",
-            "Universal Render Pipeline/Simple Lit",
-            "Universal Render Pipeline/Unlit",
-            "Standard",
-            "Unlit/Color",
-            "Sprites/Default",
-            "Hidden/InternalErrorShader"
-        };
-
-        static readonly string[] BuiltinFirst =
+        static readonly string[] BuiltinShaders =
         {
             "Standard",
             "Unlit/Color",
             "Sprites/Default",
-            "Universal Render Pipeline/Lit",
-            "Universal Render Pipeline/Simple Lit",
-            "Universal Render Pipeline/Unlit",
-            "Hidden/InternalErrorShader"
+            "Legacy Shaders/Diffuse"
         };
 
         static Shader _cachedShader;
         static string _cachedShaderName;
         static bool _loggedChoice;
 
-        /// <summary>Solid-color material using the best available URP/builtin shader.</summary>
+        /// <summary>Solid-color material using a Built-in pipeline shader.</summary>
         public static Material CreateColor(Color color)
         {
             var shader = ResolveShader();
@@ -52,12 +37,7 @@ namespace WarHoller.Art
             if (_cachedShader != null)
                 return _cachedShader;
 
-            // If no SRP is active, prefer Built-in shaders so we never pink-out waiting on URP.
-            var pipelineActive = GraphicsSettings.currentRenderPipeline != null
-                                 || GraphicsSettings.defaultRenderPipeline != null;
-            var candidates = pipelineActive ? UrpFirst : BuiltinFirst;
-
-            foreach (var name in candidates)
+            foreach (var name in BuiltinShaders)
             {
                 var shader = Shader.Find(name);
                 if (shader == null)
@@ -69,22 +49,19 @@ namespace WarHoller.Art
                 if (!_loggedChoice)
                 {
                     _loggedChoice = true;
-                    if (name == "Hidden/InternalErrorShader")
-                        Debug.LogError("[WarHoller] No usable surface shader found; materials will be pink until shaders import.");
-                    else if (!name.StartsWith("Universal Render Pipeline"))
-                        Debug.LogWarning($"[WarHoller] Using Built-in/fallback shader '{name}' (pipelineActive={pipelineActive}).");
-                    else
-                        Debug.Log($"[WarHoller] MaterialUtil using URP shader '{name}'.");
+                    Debug.Log($"[WarHoller] MaterialUtil using Built-in shader '{name}'.");
                 }
 
                 return shader;
             }
 
-            Debug.LogError("[WarHoller] Shader.Find returned null for every candidate.");
+            Debug.LogError(
+                "[WarHoller] No Built-in surface shader found (Standard / Unlit/Color / Sprites/Default / Legacy Diffuse). " +
+                "Materials will be pink until shaders import — quit Unity, delete Library/, reopen.");
             return null;
         }
 
-        /// <summary>Drop cached shader so the next CreateColor re-probes after a pipeline assign.</summary>
+        /// <summary>Drop cached shader so the next CreateColor re-probes.</summary>
         public static void InvalidateCache()
         {
             _cachedShader = null;
@@ -98,8 +75,6 @@ namespace WarHoller.Art
         {
             if (mat == null) return;
 
-            // Write both property names so the material works on URP *and* Built-in.
-            mat.SetColor("_BaseColor", color);
             mat.SetColor("_Color", color);
             try { mat.color = color; }
             catch (System.Exception) { /* some shaders reject material.color */ }
