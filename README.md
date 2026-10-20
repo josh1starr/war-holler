@@ -41,18 +41,36 @@ Project version file: `ProjectSettings/ProjectVersion.txt` → `6000.0.32f1`. Op
 
 **Input note:** Legacy Input Manager (`Input.GetAxis` / mouse buttons). The New Input System package is in the manifest for a future migration; `activeInputHandler` is set to **Both** so Play Mode works without an Input Actions asset.
 
-### Safe Mode (script compile failures)
+### Safe Mode (script compile / package failures)
 
 If Unity opens in **Safe Mode**:
 
-1. Confirm you are on **latest `main`** (`git pull origin main`). Do not keep working from a zip/tarball taken before PR #2.
-2. Console → clear all filters (Error / Warning / Log / collapsed) → copy **all red errors** and send them if Safe Mode persists after pull.
+1. Confirm you are on **latest `main`** (`git pull origin main`).
+2. **Quit Unity completely**, then delete stale generated folders next to `Assets/` (do not commit these — they are gitignored):
+   ```bash
+   # from the project root (the folder that contains Assets/, Packages/, ProjectSettings/)
+   rm -rf Library Temp
+   # optional: also clear old IDE project files so Unity regenerates them
+   rm -f *.csproj *.sln
+   ```
+   Reopen the project in Unity Hub and let packages reimport.
 3. Safe Mode dialog choices:
-   - **Ignore** — open the project anyway (assets may be incomplete until scripts compile).
-   - **Quit** — exit Unity, pull/fix, reopen the project.
-4. After scripts compile cleanly, Unity exits Safe Mode automatically on the next open/reimport.
+   - **Ignore** — open anyway (assets may be incomplete until scripts/packages load).
+   - **Quit** — exit, wipe `Library/` + `Temp/`, pull/fix, reopen.
+4. After scripts compile cleanly and packages resolve, Unity exits Safe Mode on its own.
 
-The known CS0119 (`UiFactory` methods named `Button`/`Slider` shadowing `UnityEngine.UI.*`) was fixed on `main` (PR #2) and further hardened by renaming those factories to `CreateButton` / `CreateSlider`.
+**Packages note:** This project keeps `com.unity.test-framework` (1.4.5, Unity 6 / URP 17 compatible) and Rider IDE integration. `com.unity.ide.visualstudio` was removed — an older Visual Studio Editor package could fail to resolve `UnityEditor.TestRunner` / `nunit.framework` and leave `Unity.VisualStudio.Editor.dll` unloadable. Re-add **Visual Studio Editor 2.0.28+** from Package Manager only if you need VS project generation.
+
+**When pasting Console errors for help**, separate them:
+
+| Paste as | What to copy |
+|----------|----------------|
+| **Script compile errors** | Red lines with `error CS####` (e.g. `CS0119`, `CS0246`) — these are the ones that keep Safe Mode on. |
+| **Package / assembly warnings** | Lines about `Library/ScriptAssemblies/*.dll will not be loaded`, `Unable to resolve reference`, Package Manager resolve failures — useful, but different from CS errors. |
+
+Clear Console filters (Error / Warning / Log; uncollapse) before copying. Prefer **one paste of CS#### lines**, then optionally a second paste of package/assembly messages.
+
+Known fixed issues already on `main`: UiFactory `Button`/`Slider` CS0119 (PR #2 / #3); pink URP + silent gunfire (PR #4 / #5).
 
 ### URP note
 
