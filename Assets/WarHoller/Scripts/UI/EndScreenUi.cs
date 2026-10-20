@@ -40,7 +40,7 @@ namespace WarHoller.UI
             UiFactory.Label(_canvas.transform, sb.ToString(), 24, TextAnchor.UpperCenter,
                 new Color(0.9f, 0.85f, 0.7f), new Vector2(0f, -240f), new Vector2(700f, 420f));
 
-            UiFactory.Button(_canvas.transform, "MAIN MENU", new Vector2(0f, 100f), new Vector2(260f, 64f),
+            UiFactory.CreateButton(_canvas.transform, "MAIN MENU", new Vector2(0f, 100f), new Vector2(260f, 64f),
                 () => onContinue?.Invoke(), new Color(0.55f, 0.2f, 0.12f, 0.95f))
                 .GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0f);
         }

@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 
 namespace WarHoller.UI
 {
     /// <summary>
     /// Runtime uGUI helpers — no prefabs required.
+    /// Factory method names intentionally avoid UnityEngine.UI type names (Button/Slider/Image/Text)
+    /// so they cannot shadow those types (CS0119). UI types are fully qualified.
     /// </summary>
     public static class UiFactory
     {
@@ -25,10 +26,10 @@ namespace WarHoller.UI
             var canvas = go.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = sortOrder;
-            var scaler = go.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            var scaler = go.AddComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
-            go.AddComponent<GraphicRaycaster>();
+            go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
             return canvas;
         }
 
@@ -38,18 +39,22 @@ namespace WarHoller.UI
                 return null;
             var es = new GameObject("EventSystem");
             es.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            // Active Input Handling is Both (legacy + Input System). Prefer legacy Standalone
+            // so menu clicks work with Input.* without an Input Actions asset.
+            // If Active Input Handling is switched to Input System only, swap this for
+            // UnityEngine.InputSystem.UI.InputSystemUIInputModule.
             es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
             return es;
         }
 
-        public static Text Label(Transform parent, string text, int size, TextAnchor anchor, Color color, Vector2 anchoredPos, Vector2 sizeDelta)
+        public static UnityEngine.UI.Text Label(Transform parent, string text, int size, TextAnchor anchor, Color color, Vector2 anchoredPos, Vector2 sizeDelta)
         {
             var go = new GameObject("Label");
             go.transform.SetParent(parent, false);
             var rt = go.AddComponent<RectTransform>();
             rt.anchoredPosition = anchoredPos;
             rt.sizeDelta = sizeDelta;
-            var t = go.AddComponent<Text>();
+            var t = go.AddComponent<UnityEngine.UI.Text>();
             t.font = DefaultFont;
             t.text = text;
             t.fontSize = size;
@@ -60,7 +65,7 @@ namespace WarHoller.UI
             return t;
         }
 
-        public static Button Button(Transform parent, string label, Vector2 anchoredPos, Vector2 sizeDelta, UnityAction onClick, Color? bg = null)
+        public static UnityEngine.UI.Button CreateButton(Transform parent, string label, Vector2 anchoredPos, Vector2 sizeDelta, UnityAction onClick, Color? bg = null)
         {
             var go = new GameObject("Btn_" + label);
             go.transform.SetParent(parent, false);
@@ -68,7 +73,7 @@ namespace WarHoller.UI
             rt.anchoredPosition = anchoredPos;
             rt.sizeDelta = sizeDelta;
 
-            var img = go.AddComponent<Image>();
+            var img = go.AddComponent<UnityEngine.UI.Image>();
             img.color = bg ?? new Color(0.25f, 0.18f, 0.1f, 0.92f);
 
             var btn = go.AddComponent<UnityEngine.UI.Button>();
@@ -80,7 +85,7 @@ namespace WarHoller.UI
             return btn;
         }
 
-        public static Slider Slider(Transform parent, string name, Vector2 anchoredPos, Vector2 sizeDelta, float value, UnityAction<float> onChanged)
+        public static UnityEngine.UI.Slider CreateSlider(Transform parent, string name, Vector2 anchoredPos, Vector2 sizeDelta, float value, UnityAction<float> onChanged)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -88,7 +93,7 @@ namespace WarHoller.UI
             rt.anchoredPosition = anchoredPos;
             rt.sizeDelta = sizeDelta;
 
-            var bg = go.AddComponent<Image>();
+            var bg = go.AddComponent<UnityEngine.UI.Image>();
             bg.color = new Color(0.1f, 0.08f, 0.05f, 0.8f);
 
             var fillArea = new GameObject("Fill Area");
@@ -101,7 +106,7 @@ namespace WarHoller.UI
 
             var fill = new GameObject("Fill");
             fill.transform.SetParent(fillArea.transform, false);
-            var fillImg = fill.AddComponent<Image>();
+            var fillImg = fill.AddComponent<UnityEngine.UI.Image>();
             fillImg.color = new Color(0.75f, 0.55f, 0.2f, 1f);
             var fillImgRt = fill.GetComponent<RectTransform>();
             fillImgRt.anchorMin = Vector2.zero;
@@ -119,7 +124,7 @@ namespace WarHoller.UI
 
             var handle = new GameObject("Handle");
             handle.transform.SetParent(handleArea.transform, false);
-            var handleImg = handle.AddComponent<Image>();
+            var handleImg = handle.AddComponent<UnityEngine.UI.Image>();
             handleImg.color = new Color(0.95f, 0.85f, 0.55f);
             var handleRt = handle.GetComponent<RectTransform>();
             handleRt.sizeDelta = new Vector2(20f, 0f);
@@ -136,7 +141,7 @@ namespace WarHoller.UI
             return slider;
         }
 
-        public static Image Panel(Transform parent, string name, Vector2 anchoredPos, Vector2 sizeDelta, Color color, Vector2? anchorMin = null, Vector2? anchorMax = null)
+        public static UnityEngine.UI.Image Panel(Transform parent, string name, Vector2 anchoredPos, Vector2 sizeDelta, Color color, Vector2? anchorMin = null, Vector2? anchorMax = null)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -145,7 +150,7 @@ namespace WarHoller.UI
             if (anchorMax.HasValue) rt.anchorMax = anchorMax.Value;
             rt.anchoredPosition = anchoredPos;
             rt.sizeDelta = sizeDelta;
-            var img = go.AddComponent<Image>();
+            var img = go.AddComponent<UnityEngine.UI.Image>();
             img.color = color;
             return img;
         }

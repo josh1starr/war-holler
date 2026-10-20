@@ -90,14 +90,14 @@ namespace WarHoller.UI
             title.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 1f);
 
             // Play — bottom center
-            var play = UiFactory.Button(root, "PLAY", new Vector2(0f, 80f), new Vector2(280f, 72f),
+            var play = UiFactory.CreateButton(root, "PLAY", new Vector2(0f, 80f), new Vector2(280f, 72f),
                 () => OnPlay?.Invoke(), new Color(0.55f, 0.2f, 0.12f, 0.95f));
             var playRt = play.GetComponent<RectTransform>();
             playRt.anchorMin = new Vector2(0.5f, 0f);
             playRt.anchorMax = new Vector2(0.5f, 0f);
 
             // Quit — bottom left
-            var quit = UiFactory.Button(root, "QUIT", new Vector2(120f, 80f), new Vector2(160f, 56f),
+            var quit = UiFactory.CreateButton(root, "QUIT", new Vector2(120f, 80f), new Vector2(160f, 56f),
                 () => OnQuit?.Invoke(), new Color(0.2f, 0.15f, 0.1f, 0.9f));
             var quitRt = quit.GetComponent<RectTransform>();
             quitRt.anchorMin = new Vector2(0f, 0f);
@@ -125,35 +125,35 @@ namespace WarHoller.UI
 
             _resLabel = UiFactory.Label(p, ResText(), 20, TextAnchor.MiddleLeft,
                 Color.white, new Vector2(20f, -110f), new Vector2(360f, 28f));
-            UiFactory.Button(p, "Res -", new Vector2(-90f, -150f), new Vector2(100f, 36f), CycleResDown);
-            UiFactory.Button(p, "Res +", new Vector2(30f, -150f), new Vector2(100f, 36f), CycleResUp);
+            UiFactory.CreateButton(p, "Res -", new Vector2(-90f, -150f), new Vector2(100f, 36f), CycleResDown);
+            UiFactory.CreateButton(p, "Res +", new Vector2(30f, -150f), new Vector2(100f, 36f), CycleResUp);
 
             _qualityLabel = UiFactory.Label(p, QualityText(), 20, TextAnchor.MiddleLeft,
                 Color.white, new Vector2(20f, -200f), new Vector2(360f, 28f));
-            UiFactory.Button(p, "Quality", new Vector2(-40f, -240f), new Vector2(160f, 36f), CycleQuality);
+            UiFactory.CreateButton(p, "Quality", new Vector2(-40f, -240f), new Vector2(160f, 36f), CycleQuality);
 
-            UiFactory.Button(p, SettingsStore.Fullscreen ? "Fullscreen: ON" : "Fullscreen: OFF",
+            UiFactory.CreateButton(p, SettingsStore.Fullscreen ? "Fullscreen: ON" : "Fullscreen: OFF",
                 new Vector2(-40f, -290f), new Vector2(200f, 36f), ToggleFullscreen);
 
             UiFactory.Label(p, "Audio", 24, TextAnchor.UpperLeft,
                 new Color(0.85f, 0.75f, 0.55f), new Vector2(20f, -340f), new Vector2(200f, 30f));
 
             UiFactory.Label(p, "Master", 18, TextAnchor.MiddleLeft, Color.white, new Vector2(20f, -375f), new Vector2(100f, 24f));
-            UiFactory.Slider(p, "Master", new Vector2(40f, -400f), new Vector2(280f, 24f), SettingsStore.MasterVolume, v =>
+            UiFactory.CreateSlider(p, "Master", new Vector2(40f, -400f), new Vector2(280f, 24f), SettingsStore.MasterVolume, v =>
             {
                 SettingsStore.MasterVolume = v;
                 SettingsStore.SaveAndApply();
             });
 
             UiFactory.Label(p, "SFX", 18, TextAnchor.MiddleLeft, Color.white, new Vector2(20f, -430f), new Vector2(100f, 24f));
-            UiFactory.Slider(p, "SFX", new Vector2(40f, -455f), new Vector2(280f, 24f), SettingsStore.SfxVolume, v =>
+            UiFactory.CreateSlider(p, "SFX", new Vector2(40f, -455f), new Vector2(280f, 24f), SettingsStore.SfxVolume, v =>
             {
                 SettingsStore.SfxVolume = v;
                 PlayerPrefs.Save();
             });
 
             UiFactory.Label(p, "Voice", 18, TextAnchor.MiddleLeft, Color.white, new Vector2(20f, -485f), new Vector2(100f, 24f));
-            UiFactory.Slider(p, "Voice", new Vector2(40f, -510f), new Vector2(280f, 24f), SettingsStore.VoiceVolume, v =>
+            UiFactory.CreateSlider(p, "Voice", new Vector2(40f, -510f), new Vector2(280f, 24f), SettingsStore.VoiceVolume, v =>
             {
                 SettingsStore.VoiceVolume = v;
                 PlayerPrefs.Save();
