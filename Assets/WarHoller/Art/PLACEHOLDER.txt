@@ -1,0 +1,2 @@
+Art is generated at runtime from primitives (barn, The Holler, mannequins, weapons).
+Drop authored meshes/materials here later; builders already isolate material creation.
