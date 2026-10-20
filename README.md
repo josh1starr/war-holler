@@ -15,11 +15,11 @@ Project version file: `ProjectSettings/ProjectVersion.txt` → `6000.0.32f1`. Op
 ## Open & play (Josh)
 
 1. Install **Unity Hub** + **Unity 6 LTS** (URP template modules optional — packages are in `Packages/manifest.json`).
-2. **Pull latest `main`** (or open a fresh clone). PR #1 (slice) and PR #2 (UiFactory CS0119) are already merged — an older checkout will still enter Safe Mode.
-3. **Add** this project folder in Hub → Open.
+2. **Pull latest `main`** (or open a fresh clone). PR #1–#4 are merged; pull again if you still see all-pink / silent guns.
+3. **Add** this project folder in Hub → Open (or reopen the project so URP reimports).
 4. On first open, let Unity import packages (URP, uGUI, Input System package is listed but **this slice uses Legacy Input** via `Input.*` — see below).
 5. Open scene `Assets/Scenes/Bootstrap.unity` (also listed in Build Settings).
-6. Press **Play**.
+6. Press **Play**. Console should log `[WarHoller] Pipeline bootstrap` and LMB fire should bang + log `[WarHoller] FIRE …`.
 7. Flow:
    - **Main Menu** — full-bleed barn, **WAR HOLLER** title, settings (left), **PLAY** (bottom), **QUIT** (bottom-left). Click either mannequin → Character Select.
    - **PLAY** quick-starts FFA on The Holler with current/default loadout and fills empty slots with bots (~12 participants).
@@ -56,9 +56,9 @@ The known CS0119 (`UiFactory` methods named `Button`/`Slider` shadowing `UnityEn
 
 ### URP note
 
-`Packages/manifest.json` includes `com.unity.render-pipelines.universal`. This repo ships ready-to-load URP assets under `Assets/Settings/` (`PC_RPAsset` / `Mobile_RPAsset` + renderers + Global Settings), already assigned in **Project Settings → Graphics** and **Quality**. Runtime materials go through `WarHoller.Art.MaterialUtil.CreateColor` (URP Lit → Simple Lit → Unlit → Standard fallback).
+`Packages/manifest.json` includes `com.unity.render-pipelines.universal`. This repo ships URP assets under `Assets/Settings/` **and** runtime-loadable copies under `Assets/WarHoller/Resources/URP/`. On Play, `RenderPipelineBootstrap` assigns `GraphicsSettings.defaultRenderPipeline` + `QualitySettings.renderPipeline` before materials spawn. Materials go through `WarHoller.Art.MaterialUtil.CreateColor` (URP Lit → … → Standard / Unlit/Color / Sprites/Default), setting both `_BaseColor` and `_Color`.
 
-**If still pink:** Project Settings → Graphics → Scriptable Render Pipeline Settings should be `PC_RPAsset` (and each Quality level’s Custom Render Pipeline should be `PC_RPAsset` or `Mobile_RPAsset`). Then let Unity finish importing URP shaders and re-enter Play Mode.
+**If still pink after pull + reopen:** check Console for `[WarHoller] Pipeline bootstrap` (logs whether `currentRenderPipeline` is null and which `Shader.Find` calls succeeded). Nuclear option: Project Settings → Graphics → Scriptable Render Pipeline Settings → **None** (Built-in) so MaterialUtil’s Standard/Unlit fallbacks paint correctly until URP finishes importing.
 
 ## What’s in the slice
 

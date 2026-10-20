@@ -202,6 +202,15 @@ namespace WarHoller.Maps
             RenderSettings.fogColor = new Color(0.55f, 0.6f, 0.55f);
             RenderSettings.fogMode = FogMode.ExponentialSquared;
             RenderSettings.fogDensity = 0.012f;
+
+            // Solid sky clear on every live camera — never depend on a skybox shader.
+            var sky = new Color(0.45f, 0.68f, 0.92f);
+            foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None))
+            {
+                if (cam == null || !cam.enabled) continue;
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = sky;
+            }
         }
 
         static GameObject Box(Transform parent, string name, Vector3 localPos, Vector3 scale, Material mat)

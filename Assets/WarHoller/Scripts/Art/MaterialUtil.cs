@@ -1,35 +1,46 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace WarHoller.Art
 {
     /// <summary>
-    /// Runtime material factory with a URP-first shader fallback chain.
-    /// Avoids pink/magenta when Lit is missing or the pipeline is still warming up.
+    /// Runtime material factory with a pipeline-aware shader fallback chain.
+    /// Sets both URP (_BaseColor) and Built-in (_Color) so materials stay tinted on either pipeline.
     /// </summary>
     public static class MaterialUtil
     {
-        static readonly string[] ShaderCandidates =
+        static readonly string[] UrpFirst =
         {
             "Universal Render Pipeline/Lit",
             "Universal Render Pipeline/Simple Lit",
             "Universal Render Pipeline/Unlit",
-            "Unlit/Color",
             "Standard",
+            "Unlit/Color",
+            "Sprites/Default",
+            "Hidden/InternalErrorShader"
+        };
+
+        static readonly string[] BuiltinFirst =
+        {
+            "Standard",
+            "Unlit/Color",
+            "Sprites/Default",
+            "Universal Render Pipeline/Lit",
+            "Universal Render Pipeline/Simple Lit",
+            "Universal Render Pipeline/Unlit",
             "Hidden/InternalErrorShader"
         };
 
         static Shader _cachedShader;
         static string _cachedShaderName;
+        static bool _loggedChoice;
 
         /// <summary>Solid-color material using the best available URP/builtin shader.</summary>
         public static Material CreateColor(Color color)
         {
             var shader = ResolveShader();
             if (shader == null)
-            {
-                // Last-ditch: Unity always has this, even when surface shaders failed to load.
                 shader = Shader.Find("Hidden/InternalErrorShader");
-            }
 
             var mat = new Material(shader);
             ApplyColor(mat, color);
@@ -41,7 +52,12 @@ namespace WarHoller.Art
             if (_cachedShader != null)
                 return _cachedShader;
 
-            foreach (var name in ShaderCandidates)
+            // If no SRP is active, prefer Built-in shaders so we never pink-out waiting on URP.
+            var pipelineActive = GraphicsSettings.currentRenderPipeline != null
+                                 || GraphicsSettings.defaultRenderPipeline != null;
+            var candidates = pipelineActive ? UrpFirst : BuiltinFirst;
+
+            foreach (var name in candidates)
             {
                 var shader = Shader.Find(name);
                 if (shader == null)
@@ -50,10 +66,16 @@ namespace WarHoller.Art
                 _cachedShader = shader;
                 _cachedShaderName = name;
 
-                if (name == "Hidden/InternalErrorShader")
-                    Debug.LogError("[WarHoller] No usable surface shader found; materials will be pink until URP shaders import.");
-                else if (name != "Universal Render Pipeline/Lit")
-                    Debug.LogWarning($"[WarHoller] Using fallback shader '{name}' (URP Lit unavailable).");
+                if (!_loggedChoice)
+                {
+                    _loggedChoice = true;
+                    if (name == "Hidden/InternalErrorShader")
+                        Debug.LogError("[WarHoller] No usable surface shader found; materials will be pink until shaders import.");
+                    else if (!name.StartsWith("Universal Render Pipeline"))
+                        Debug.LogWarning($"[WarHoller] Using Built-in/fallback shader '{name}' (pipelineActive={pipelineActive}).");
+                    else
+                        Debug.Log($"[WarHoller] MaterialUtil using URP shader '{name}'.");
+                }
 
                 return shader;
             }
@@ -62,16 +84,25 @@ namespace WarHoller.Art
             return null;
         }
 
+        /// <summary>Drop cached shader so the next CreateColor re-probes after a pipeline assign.</summary>
+        public static void InvalidateCache()
+        {
+            _cachedShader = null;
+            _cachedShaderName = null;
+            _loggedChoice = false;
+        }
+
+        public static string CachedShaderName => _cachedShaderName;
+
         static void ApplyColor(Material mat, Color color)
         {
             if (mat == null) return;
 
-            // Prefer URP/Lit base color; fall back to legacy _Color / material.color.
-            if (mat.HasProperty("_BaseColor"))
-                mat.SetColor("_BaseColor", color);
-            if (mat.HasProperty("_Color"))
-                mat.SetColor("_Color", color);
-            mat.color = color;
+            // Write both property names so the material works on URP *and* Built-in.
+            mat.SetColor("_BaseColor", color);
+            mat.SetColor("_Color", color);
+            try { mat.color = color; }
+            catch (System.Exception) { /* some shaders reject material.color */ }
         }
     }
 }

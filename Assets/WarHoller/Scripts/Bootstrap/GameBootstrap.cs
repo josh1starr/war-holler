@@ -1,4 +1,5 @@
 using UnityEngine;
+using WarHoller.Art;
 using WarHoller.Core;
 using WarHoller.Gameplay;
 using WarHoller.UI;
@@ -20,6 +21,10 @@ namespace WarHoller.Bootstrap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void AutoBoot()
         {
+            // Pipeline assign also runs BeforeSceneLoad; re-affirm here before any materials spawn.
+            RenderPipelineBootstrap.EnsurePipeline(forceLog: false);
+            MaterialUtil.InvalidateCache();
+
             if (Instance != null) return;
             var existing = FindFirstObjectByType<GameBootstrap>();
             if (existing != null) return;
@@ -38,6 +43,9 @@ namespace WarHoller.Bootstrap
             }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            RenderPipelineBootstrap.EnsurePipeline(forceLog: true);
+            MaterialUtil.InvalidateCache();
         }
 
         void Start()
