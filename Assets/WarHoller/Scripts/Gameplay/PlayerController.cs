@@ -51,10 +51,11 @@ namespace WarHoller.Gameplay
                 camGo.AddComponent<AudioListener>();
                 PlayerCamera.nearClipPlane = 0.05f;
                 PlayerCamera.fieldOfView = 75f;
-                // Solid country-sky clear so a missing/broken skybox never paints magenta.
-                PlayerCamera.clearFlags = CameraClearFlags.SolidColor;
-                PlayerCamera.backgroundColor = new Color(0.45f, 0.68f, 0.92f);
             }
+
+            // Solid country-sky clear so a missing/broken skybox never paints magenta.
+            PlayerCamera.clearFlags = CameraClearFlags.SolidColor;
+            PlayerCamera.backgroundColor = new Color(0.45f, 0.68f, 0.92f);
 
             if (Weapon == null)
                 Weapon = GetComponentInChildren<WeaponController>();
@@ -86,8 +87,10 @@ namespace WarHoller.Gameplay
 
             if (Weapon != null)
             {
-                Weapon.SetAds(Input.GetMouseButton(1));
-                if (Input.GetMouseButton(0)) Weapon.TryFire();
+                Weapon.SetAds(Input.GetMouseButton(1) || Input.GetButton("Fire2"));
+                // Fire1 + LMB so Legacy Input still works when Input System package is present (Both mode).
+                var fireHeld = Input.GetMouseButton(0) || Input.GetButton("Fire1");
+                if (fireHeld) Weapon.TryFire();
                 if (Input.GetKeyDown(KeyCode.R)) Weapon.TryReload();
             }
 
