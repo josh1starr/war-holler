@@ -58,8 +58,9 @@ namespace WarHoller.Characters
             }
 
             // Strip primitive colliders; combatants use CharacterController only.
+            // Use Destroy (not DestroyImmediate) so this is safe at runtime in builds / Play Mode.
             foreach (var col in root.GetComponentsInChildren<Collider>())
-                Object.DestroyImmediate(col);
+                Object.Destroy(col);
 
             if (includeCollider)
             {

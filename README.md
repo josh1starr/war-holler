@@ -15,11 +15,12 @@ Project version file: `ProjectSettings/ProjectVersion.txt` → `6000.0.32f1`. Op
 ## Open & play (Josh)
 
 1. Install **Unity Hub** + **Unity 6 LTS** (URP template modules optional — packages are in `Packages/manifest.json`).
-2. **Add** this project folder in Hub → Open.
-3. On first open, let Unity import packages (URP, uGUI, Input System package is listed but **this slice uses Legacy Input** via `Input.*` — see below).
-4. Open scene `Assets/Scenes/Bootstrap.unity` (also listed in Build Settings).
-5. Press **Play**.
-6. Flow:
+2. **Pull latest `main`** (or open a fresh clone). PR #1 (slice) and PR #2 (UiFactory CS0119) are already merged — an older checkout will still enter Safe Mode.
+3. **Add** this project folder in Hub → Open.
+4. On first open, let Unity import packages (URP, uGUI, Input System package is listed but **this slice uses Legacy Input** via `Input.*` — see below).
+5. Open scene `Assets/Scenes/Bootstrap.unity` (also listed in Build Settings).
+6. Press **Play**.
+7. Flow:
    - **Main Menu** — full-bleed barn, **WAR HOLLER** title, settings (left), **PLAY** (bottom), **QUIT** (bottom-left). Click either mannequin → Character Select.
    - **PLAY** quick-starts FFA on The Holler with current/default loadout and fills empty slots with bots (~12 participants).
    - **Character Select** — 3 Hatfields / 3 McCoys (one female each; Asmon Hatfield is a labeled parody). Pick lever-action / revolver / shotgun → **CONFIRM**.
@@ -39,6 +40,19 @@ Project version file: `ProjectSettings/ProjectVersion.txt` → `6000.0.32f1`. Op
 | Scoreboard | Hold Tab or Esc |
 
 **Input note:** Legacy Input Manager (`Input.GetAxis` / mouse buttons). The New Input System package is in the manifest for a future migration; `activeInputHandler` is set to **Both** so Play Mode works without an Input Actions asset.
+
+### Safe Mode (script compile failures)
+
+If Unity opens in **Safe Mode**:
+
+1. Confirm you are on **latest `main`** (`git pull origin main`). Do not keep working from a zip/tarball taken before PR #2.
+2. Console → clear all filters (Error / Warning / Log / collapsed) → copy **all red errors** and send them if Safe Mode persists after pull.
+3. Safe Mode dialog choices:
+   - **Ignore** — open the project anyway (assets may be incomplete until scripts compile).
+   - **Quit** — exit Unity, pull/fix, reopen the project.
+4. After scripts compile cleanly, Unity exits Safe Mode automatically on the next open/reimport.
+
+The known CS0119 (`UiFactory` methods named `Button`/`Slider` shadowing `UnityEngine.UI.*`) was fixed on `main` (PR #2) and further hardened by renaming those factories to `CreateButton` / `CreateSlider`.
 
 ### URP note
 

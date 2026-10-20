@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WarHoller.Characters;
 using WarHoller.Core;
+using WarHoller.Weapons;
 
 namespace WarHoller.UI
 {
@@ -39,7 +40,7 @@ namespace WarHoller.UI
             {
                 var captured = c;
                 var label = c.DisplayName + (c.IsFemale ? " ♀" : "") + (c.IsParody ? " *" : "");
-                UiFactory.Button(root, label, new Vector2(-380f, hy), new Vector2(340f, 48f),
+                UiFactory.CreateButton(root, label, new Vector2(-380f, hy), new Vector2(340f, 48f),
                     () => SelectCharacter(captured.Id),
                     new Color(0.2f, 0.28f, 0.4f, 0.95f));
                 hy -= 60f;
@@ -53,7 +54,7 @@ namespace WarHoller.UI
             {
                 var captured = c;
                 var label = c.DisplayName + (c.IsFemale ? " ♀" : "");
-                UiFactory.Button(root, label, new Vector2(380f, my), new Vector2(340f, 48f),
+                UiFactory.CreateButton(root, label, new Vector2(380f, my), new Vector2(340f, 48f),
                     () => SelectCharacter(captured.Id),
                     new Color(0.4f, 0.18f, 0.15f, 0.95f));
                 my -= 60f;
@@ -65,14 +66,14 @@ namespace WarHoller.UI
             UiFactory.Label(root, "WEAPON", 28, TextAnchor.UpperCenter,
                 new Color(0.95f, 0.85f, 0.5f), new Vector2(0f, -360f), new Vector2(400f, 36f));
 
-            UiFactory.Button(root, "Lever-Action Rifle", new Vector2(-280f, -420f), new Vector2(240f, 48f),
+            UiFactory.CreateButton(root, "Lever-Action Rifle", new Vector2(-280f, -420f), new Vector2(240f, 48f),
                 () => SelectWeapon(WeaponIds.LeverActionRifle));
-            UiFactory.Button(root, "Revolver", new Vector2(0f, -420f), new Vector2(200f, 48f),
+            UiFactory.CreateButton(root, "Revolver", new Vector2(0f, -420f), new Vector2(200f, 48f),
                 () => SelectWeapon(WeaponIds.Revolver));
-            UiFactory.Button(root, "Shotgun", new Vector2(260f, -420f), new Vector2(200f, 48f),
+            UiFactory.CreateButton(root, "Shotgun", new Vector2(260f, -420f), new Vector2(200f, 48f),
                 () => SelectWeapon(WeaponIds.Shotgun));
 
-            UiFactory.Button(root, "CONFIRM", new Vector2(0f, 90f), new Vector2(260f, 64f), () =>
+            UiFactory.CreateButton(root, "CONFIRM", new Vector2(0f, 90f), new Vector2(260f, 64f), () =>
             {
                 PlayerLoadout.CharacterId = _selectedId;
                 PlayerLoadout.Weapon = _weapon;
@@ -81,7 +82,7 @@ namespace WarHoller.UI
                 OnConfirm?.Invoke();
             }, new Color(0.55f, 0.2f, 0.12f, 0.95f)).GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0f);
 
-            UiFactory.Button(root, "BACK", new Vector2(120f, 90f), new Vector2(140f, 48f),
+            UiFactory.CreateButton(root, "BACK", new Vector2(120f, 90f), new Vector2(140f, 48f),
                 () => OnBack?.Invoke(), new Color(0.2f, 0.15f, 0.1f, 0.9f))
                 .GetComponent<RectTransform>().anchorMin = new Vector2(0f, 0f);
 
@@ -106,7 +107,7 @@ namespace WarHoller.UI
         void RefreshDetail()
         {
             var c = CharacterRoster.Get(_selectedId);
-            var w = Weapons.WeaponStats.Get(_weapon);
+            var w = WeaponStats.Get(_weapon);
             var parody = c.IsParody ? "\n" + c.ParodyNote : "";
             _detail.text = $"{c.DisplayName}\n{c.Faction}\nWeapon: {w.DisplayName}{parody}";
         }
