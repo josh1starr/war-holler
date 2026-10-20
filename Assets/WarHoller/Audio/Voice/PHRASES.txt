@@ -1,0 +1,9 @@
+War Holler voice placeholders (replace with real VO)
+
+kill_yeehaw.wav: PLACEHOLDER: Yeehaw!
+streak_triple.wav: PLACEHOLDER: We eatin good tonight boy!
+streak_five.wav: PLACEHOLDER: Yippie ka-yay mother fucker
+bark_git_from_my_land.wav: PLACEHOLDER bark: Git from my land!
+bark_that_all_you_got.wav: PLACEHOLDER bark: That all you got, cousin?
+bark_hold_still.wav: PLACEHOLDER bark: Hold still now!
+bark_whoo_wee.wav: PLACEHOLDER bark: Whoo-wee!
