@@ -2,11 +2,11 @@
 
 Redneck comedy FPS vertical slice — barn main menu → character/weapon select → Free-for-All on **The Holler** with bots, early-1900s guns, and kill-streak voice lines.
 
-Built as a **code-driven Unity 6 URP** project: almost no manual scene setup. `GameBootstrap` constructs menus, the barn backdrop, The Holler map, characters, weapons, and bots at runtime from primitives.
+Built as a **code-driven Unity 6 Built-in Render Pipeline** project: almost no manual scene setup. `GameBootstrap` constructs menus, the barn backdrop, The Holler map, characters, weapons, and bots at runtime from primitives.
 
 ## Requirements
 
-- **Unity 6 LTS** (`6000.0.x` or newer 6000.x) with **Universal Render Pipeline (URP)**
+- **Unity 6 LTS** (`6000.0.x` or newer 6000.x) — **Built-in Render Pipeline** (no URP / HDRP)
 - Windows / macOS / Linux Editor
 - This repo targets Editor **Play Mode** first. A Windows player build is done from the Editor (Unity batchmode was not available in the cloud agent that scaffolded this).
 
@@ -14,13 +14,18 @@ Project version file: `ProjectSettings/ProjectVersion.txt` → `6000.0.32f1`. Op
 
 ## Open & play (Josh)
 
-1. Install **Unity Hub** + **Unity 6 LTS** (URP template modules optional — packages are in `Packages/manifest.json`).
-2. **Pull latest `main`** (or open a fresh clone). PR #1–#4 are merged; pull again if you still see all-pink / silent guns.
-3. **Add** this project folder in Hub → Open (or reopen the project so URP reimports).
-4. On first open, let Unity import packages (URP, uGUI, Input System package is listed but **this slice uses Legacy Input** via `Input.*` — see below).
-5. Open scene `Assets/Scenes/Bootstrap.unity` (also listed in Build Settings).
-6. Press **Play**. Console should log `[WarHoller] Pipeline bootstrap` and LMB fire should bang + log `[WarHoller] FIRE …`.
-7. Flow:
+1. Install **Unity Hub** + **Unity 6 LTS** (3D / Built-in template is fine — do **not** need URP).
+2. **Pull latest `main`** (or open a fresh clone).
+3. **Quit Unity completely** if the project is open.
+4. **Delete `Library/`** (and optionally `Temp/`) next to `Assets/` so stale URP imports cannot linger:
+   ```bash
+   # from the project root (the folder that contains Assets/, Packages/, ProjectSettings/)
+   rm -rf Library Temp
+   ```
+5. **Add** / reopen this project folder in Hub. Let packages import (uGUI, test-framework, etc. — **no URP**).
+6. Open scene `Assets/Scenes/Bootstrap.unity` (also listed in Build Settings).
+7. Press **Play**. Console should log `[WarHoller] Built-in pipeline bootstrap` and `MaterialUtil using Built-in shader 'Standard'` (or Unlit/Color). LMB fire should bang + log `[WarHoller] FIRE …`.
+8. Flow:
    - **Main Menu** — full-bleed barn, **WAR HOLLER** title, settings (left), **PLAY** (bottom), **QUIT** (bottom-left). Click either mannequin → Character Select.
    - **PLAY** quick-starts FFA on The Holler with current/default loadout and fills empty slots with bots (~12 participants).
    - **Character Select** — 3 Hatfields / 3 McCoys (one female each; Asmon Hatfield is a labeled parody). Pick lever-action / revolver / shotgun → **CONFIRM**.
@@ -59,7 +64,7 @@ If Unity opens in **Safe Mode**:
    - **Quit** — exit, wipe `Library/` + `Temp/`, pull/fix, reopen.
 4. After scripts compile cleanly and packages resolve, Unity exits Safe Mode on its own.
 
-**Packages note:** This project keeps `com.unity.test-framework` (1.4.5, Unity 6 / URP 17 compatible) and Rider IDE integration. `com.unity.ide.visualstudio` was removed — an older Visual Studio Editor package could fail to resolve `UnityEditor.TestRunner` / `nunit.framework` and leave `Unity.VisualStudio.Editor.dll` unloadable. Re-add **Visual Studio Editor 2.0.28+** from Package Manager only if you need VS project generation.
+**Packages note:** This project keeps `com.unity.test-framework` (1.4.5) and Rider IDE integration. `com.unity.ide.visualstudio` was removed — an older Visual Studio Editor package could fail to resolve `UnityEditor.TestRunner` / `nunit.framework` and leave `Unity.VisualStudio.Editor.dll` unloadable. Re-add **Visual Studio Editor 2.0.28+** from Package Manager only if you need VS project generation. **URP is not used** — do not add `com.unity.render-pipelines.universal`.
 
 **When pasting Console errors for help**, separate them:
 
@@ -70,13 +75,13 @@ If Unity opens in **Safe Mode**:
 
 Clear Console filters (Error / Warning / Log; uncollapse) before copying. Prefer **one paste of CS#### lines**, then optionally a second paste of package/assembly messages.
 
-Known fixed issues already on `main`: UiFactory `Button`/`Slider` CS0119 (PR #2 / #3); pink URP + silent gunfire (PR #4 / #5).
+Known fixed issues already on `main`: UiFactory `Button`/`Slider` CS0119 (PR #2 / #3); pink screen + silent gunfire (PR #4 / #5); VS Editor package Safe Mode (PR #6). This project now uses **Built-in RP** (no URP asset assignment needed).
 
-### URP note
+### Pink / magenta graphics
 
-`Packages/manifest.json` includes `com.unity.render-pipelines.universal`. This repo ships URP assets under `Assets/Settings/` **and** runtime-loadable copies under `Assets/WarHoller/Resources/URP/`. On Play, `RenderPipelineBootstrap` assigns `GraphicsSettings.defaultRenderPipeline` + `QualitySettings.renderPipeline` before materials spawn. Materials go through `WarHoller.Art.MaterialUtil.CreateColor` (URP Lit → … → Standard / Unlit/Color / Sprites/Default), setting both `_BaseColor` and `_Color`.
+Project Settings → Graphics → Scriptable Render Pipeline Settings should be **None**. Quality levels should also have no custom RP asset. Runtime materials go through `WarHoller.Art.MaterialUtil.CreateColor` (`Standard` → `Unlit/Color` → `Sprites/Default` → `Legacy Shaders/Diffuse`), setting `_Color`. Cameras clear to a solid sky color (no skybox dependency).
 
-**If still pink after pull + reopen:** check Console for `[WarHoller] Pipeline bootstrap` (logs whether `currentRenderPipeline` is null and which `Shader.Find` calls succeeded). Nuclear option: Project Settings → Graphics → Scriptable Render Pipeline Settings → **None** (Built-in) so MaterialUtil’s Standard/Unlit fallbacks paint correctly until URP finishes importing.
+**If still pink after pull:** quit Unity → delete `Library/` → reopen. No URP package or asset assignment is required.
 
 ## What’s in the slice
 
@@ -101,12 +106,11 @@ Commented stubs / enums — not playable yet:
 ## Folder layout
 
 ```
-Assets/Settings/   URP PC/Mobile assets, renderer data, Global Settings
 Assets/WarHoller/
   Art/ Audio/ Characters/ Gameplay/ Maps/ UI/
   Scripts/
-    Art/         MaterialUtil (runtime URP material helper)
-    Bootstrap/   GameBootstrap
+    Art/         MaterialUtil (Built-in Standard / Unlit materials)
+    Bootstrap/   GameBootstrap, RenderPipelineBootstrap (forces Built-in)
     Core/        ModeIds, MapIds, SettingsStore, LobbyRotation, PlayerLoadout
     Characters/  CharacterRoster, CharacterVisualBuilder
     Gameplay/    GameSession, PlayerController, Health, CombatantMotor

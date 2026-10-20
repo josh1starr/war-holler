@@ -23,23 +23,23 @@ namespace WarHoller.EditorTools
             if (state != PlayModeStateChange.EnteredPlayMode)
                 return;
 
-            RenderPipelineBootstrap.EnsurePipeline(forceLog: true);
+            RenderPipelineBootstrap.EnsureBuiltIn(forceLog: true);
 
             var current = GraphicsSettings.currentRenderPipeline;
-            var litOk = Shader.Find("Universal Render Pipeline/Lit") != null;
             var standardOk = Shader.Find("Standard") != null;
+            var unlitOk = Shader.Find("Unlit/Color") != null;
             Debug.Log(
-                $"[WarHoller/Editor] Entered Play Mode — currentRenderPipeline is " +
-                $"{(current == null ? "NULL" : current.name)}; " +
-                $"URP Lit Shader.Find={(litOk ? "OK" : "FAILED")}; " +
+                $"[WarHoller/Editor] Entered Play Mode — Built-in RP; currentRenderPipeline is " +
+                $"{(current == null ? "NULL (good)" : current.name + " (UNEXPECTED)")}; " +
                 $"Standard Shader.Find={(standardOk ? "OK" : "FAILED")}; " +
+                $"Unlit/Color Shader.Find={(unlitOk ? "OK" : "FAILED")}; " +
                 $"MaterialUtil={MaterialUtil.CachedShaderName ?? MaterialUtil.ResolveShader()?.name}");
         }
 
         [MenuItem("War Holler/Diagnostics/Log Render Pipeline Status")]
         static void MenuLog()
         {
-            RenderPipelineBootstrap.EnsurePipeline(forceLog: true);
+            RenderPipelineBootstrap.EnsureBuiltIn(forceLog: true);
         }
     }
 }
