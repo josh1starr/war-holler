@@ -150,7 +150,7 @@ namespace WarHoller.Weapons
                 if (Physics.Raycast(origin, dir, out var hit, Stats.Range, HitMask, QueryTriggerInteraction.Ignore))
                 {
                     var health = hit.collider.GetComponentInParent<Health>();
-                    if (health != null && health != Owner && !health.IsDead)
+                    if (health != null && health != Owner && !health.IsDead && CanDamage(health))
                     {
                         health.ApplyDamage(Stats.Damage, Owner);
                         hitSomeone = true;
@@ -244,6 +244,14 @@ namespace WarHoller.Weapons
             }
             if (_muzzleLight != null)
                 _muzzleLight.intensity = 3.5f;
+        }
+
+        bool CanDamage(Health target)
+        {
+            if (!PlayerLoadout.IsTeamMode) return true;
+            var session = FindFirstObjectByType<GameSession>();
+            if (session == null) return true;
+            return session.AreEnemies(Owner, target);
         }
 
         static Vector3 ApplySpread(Vector3 forward, float deg)

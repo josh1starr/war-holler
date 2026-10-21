@@ -73,12 +73,18 @@ namespace WarHoller.UI
             UiFactory.CreateButton(root, "Shotgun", new Vector2(260f, -420f), new Vector2(200f, 48f),
                 () => SelectWeapon(WeaponIds.Shotgun));
 
+            var rot = LobbyRotation.Current;
+            UiFactory.Label(root,
+                $"Match: {rot.DisplayName}",
+                20, TextAnchor.UpperCenter, new Color(0.85f, 0.78f, 0.55f),
+                new Vector2(0f, -480f), new Vector2(700f, 28f));
+
             UiFactory.CreateButton(root, "CONFIRM", new Vector2(0f, 90f), new Vector2(260f, 64f), () =>
             {
                 PlayerLoadout.CharacterId = _selectedId;
                 PlayerLoadout.Weapon = _weapon;
-                PlayerLoadout.Map = MapIds.TheHoller;
-                PlayerLoadout.Mode = ModeIds.FreeForAll;
+                // Same rotation as menu Play — consume so the next visit advances.
+                LobbyRotation.ConsumeForPlay();
                 OnConfirm?.Invoke();
             }, new Color(0.55f, 0.2f, 0.12f, 0.95f)).GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0f);
 

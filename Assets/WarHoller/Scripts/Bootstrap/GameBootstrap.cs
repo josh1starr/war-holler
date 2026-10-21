@@ -75,11 +75,11 @@ namespace WarHoller.Bootstrap
 
         void HandlePlayQuickStart()
         {
-            // Quick-start FFA on The Holler with current/default loadout; bots fill to ~12.
-            PlayerLoadout.Map = MapIds.TheHoller;
-            PlayerLoadout.Mode = ModeIds.FreeForAll;
+            // Advance lobby rotation (map + mode), keep current/default loadout; bots fill.
             if (string.IsNullOrEmpty(PlayerLoadout.CharacterId))
                 PlayerLoadout.ResetDefaults();
+            var entry = LobbyRotation.ConsumeForPlay();
+            Debug.Log($"[WarHoller] Quick-join → {entry.DisplayName}");
             StartMatch();
         }
 
