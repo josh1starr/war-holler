@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using WarHoller.Core;
 using WarHoller.Gameplay;
 
 namespace WarHoller.UI
@@ -12,7 +13,14 @@ namespace WarHoller.UI
     {
         Canvas _canvas;
 
-        public void Show(string winnerName, IReadOnlyDictionary<Health, int> kills, Action onContinue)
+        public void Show(
+            string winnerName,
+            IReadOnlyDictionary<Health, int> kills,
+            ModeIds mode,
+            CaptureTheFlagMode ctf,
+            ZoneControlMode zones,
+            string subtitle,
+            Action onContinue)
         {
             UiFactory.EnsureEventSystem();
             Cursor.lockState = CursorLockMode.None;
@@ -25,11 +33,26 @@ namespace WarHoller.UI
             UiFactory.Label(_canvas.transform, "MATCH OVER", 64, TextAnchor.UpperCenter,
                 new Color(0.95f, 0.82f, 0.35f), new Vector2(0f, -80f), new Vector2(800f, 80f));
 
-            UiFactory.Label(_canvas.transform, winnerName + " wins the Holler!", 36, TextAnchor.UpperCenter,
-                Color.white, new Vector2(0f, -170f), new Vector2(900f, 50f));
+            var headline = string.IsNullOrEmpty(subtitle)
+                ? winnerName + " wins the Holler!"
+                : winnerName + " — " + subtitle;
+            UiFactory.Label(_canvas.transform, headline, 32, TextAnchor.UpperCenter,
+                Color.white, new Vector2(0f, -170f), new Vector2(1000f, 60f));
+
+            var sb = new StringBuilder();
+            sb.AppendLine(LobbyRotation.ModeLabel(mode));
+            if (mode == ModeIds.CaptureTheFlag && ctf != null)
+            {
+                sb.AppendLine($"Hatfields {ctf.HatfieldCaptures} — McCoys {ctf.McCoyCaptures} captures");
+                sb.AppendLine();
+            }
+            else if (mode == ModeIds.ZoneControl && zones != null)
+            {
+                sb.AppendLine($"Hatfields {zones.ScoreInt(FactionIds.Hatfield)} — McCoys {zones.ScoreInt(FactionIds.McCoy)} pts");
+                sb.AppendLine();
+            }
 
             var ranked = kills.OrderByDescending(kv => kv.Value).Take(12);
-            var sb = new StringBuilder();
             var i = 1;
             foreach (var kv in ranked)
             {

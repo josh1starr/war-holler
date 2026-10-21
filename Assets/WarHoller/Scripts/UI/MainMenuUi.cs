@@ -96,6 +96,15 @@ namespace WarHoller.UI
             playRt.anchorMin = new Vector2(0.5f, 0f);
             playRt.anchorMax = new Vector2(0.5f, 0f);
 
+            // Current lobby rotation (Play advances to next after this match starts)
+            var rot = LobbyRotation.Current;
+            UiFactory.Label(root, LobbyRotation.FormatCurrentLabel(), 22, TextAnchor.LowerCenter,
+                new Color(0.9f, 0.82f, 0.55f), new Vector2(0f, 165f), new Vector2(900f, 32f));
+            UiFactory.Label(root,
+                $"{LobbyRotation.MapLabel(rot.Map)}  ·  {LobbyRotation.ModeLabel(rot.Mode)}  ·  bots fill",
+                18, TextAnchor.LowerCenter, new Color(0.7f, 0.65f, 0.5f),
+                new Vector2(0f, 138f), new Vector2(900f, 28f));
+
             // Quit — bottom left
             var quit = UiFactory.CreateButton(root, "QUIT", new Vector2(120f, 80f), new Vector2(160f, 56f),
                 () => OnQuit?.Invoke(), new Color(0.2f, 0.15f, 0.1f, 0.9f));
@@ -104,8 +113,8 @@ namespace WarHoller.UI
             quitRt.anchorMax = new Vector2(0f, 0f);
 
             // Character hint
-            UiFactory.Label(root, "Click Hatfield or McCoy → Character Select", 22, TextAnchor.LowerCenter,
-                new Color(0.8f, 0.7f, 0.5f), new Vector2(0f, 170f), new Vector2(700f, 36f));
+            UiFactory.Label(root, "Click Hatfield or McCoy → Character Select (uses current rotation)", 20,
+                TextAnchor.LowerCenter, new Color(0.8f, 0.7f, 0.5f), new Vector2(0f, 200f), new Vector2(900f, 36f));
 
             BuildSettingsPanel(root);
         }
